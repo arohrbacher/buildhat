@@ -215,6 +215,7 @@ uniquely identifies the device type.
         d->signature=sig[i];
 DEB_SIG         { o1ch('P'); o1hex(i); ostr(": D5 signature="); o4hex(sig[i]); }
         if((d->signature&0x00ef)==0x00cf) d->signature=0x00cf; // ignore random RX data from active ID
+        if((d->signature&0x00ef)==0x00ef) d->signature=0x00ef; // ignore random RX data from active ID
         switch(d->signature) {                 // convert signature to device type
       default:
       case 0x1cc0:                             // extra case to cover board build with RS-485 drivers not fitted
