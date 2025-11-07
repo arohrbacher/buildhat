@@ -237,8 +237,18 @@ DEB_SIG         { o1ch('P'); o1hex(i); ostr(": D5 signature="); o4hex(sig[i]); }
       case 0x0c00: id=10; break;               // Future lights 2
       case 0x04c0: id=11; break;               // System future actuator (train points)
       case 0x00cf: id=99; break;               // potentially an active ID
+      case 0x00ef: id=88; break;               // potentially an active ID (chinese sensors)
+      case 0x00c0: id=77; break;               // potentially an active ID (RP2040 sensor)
           }
 DEB_SIG        { ostr(" id="); odec(id); onl(); }
+        if(id==77) {
+          state[i]=70;                             // attempt to decode RP2040 sensor
+          break;
+          }
+        if(id==88) {
+          state[i]=80;                             // attempt to decode chinese sensors
+          break;
+          }
         if(id==99) {
           state[i]=90;                             // attempt to decode active ID
           break;
@@ -270,6 +280,17 @@ DEB_SIG        { ostr(" id="); odec(id); onl(); }
         break;
 
 // ============================== ACTIVE ID PROCESSING =========================
+    case 70:                                       // here we may have an active ID to detect
+        gpio_set_dir(p->pin_rx,0); gpio_pull_up(p->pin_rx);
+        timers[i][1]=0;
+        state[i]=92;
+        break;
+
+    case 80:                                       // here we may have an active ID to detect
+        gpio_set_dir(p->pin_rx,0); gpio_pull_up(p->pin_rx);
+        timers[i][1]=0;
+        state[i]=92;
+        break;
 
     case 90:                                       // here we may have an active ID to detect
         gpio_set_dir(p->pin_rx,0); gpio_pull_up(p->pin_rx);
@@ -378,7 +399,8 @@ DEB_SIG        { ostr(" id="); odec(id); onl(); }
             portinfo[i].selreprate=-2;
             state[i]=0;
             }
-          if(timers[i][1]>500) {
+//          if(timers[i][1]>500) {
+          if(timers[i][1]>5000) {        // timeout longer for chinese sensors
             o1ch('P'); o1hex(i); ostrnl(": timeout during data phase: disconnecting");
             port_uartoff(i);
             portinfo[i].selmode=-1;
