@@ -331,7 +331,8 @@ DEB_SIG        { ostr(" id="); odec(id); onl(); }
             port_uartoff(i);
             state[i]=0;
             }
-          if(timers[i][1]>2000) {
+//          if(timers[i][1]>2000) {
+          if(timers[i][1]>5000) {        // timeout longer for chinese sensors
             o1ch('P'); o1hex(i); ostrnl(": timeout during setup phase: disconnecting");
             port_uartoff(i);
             state[i]=0;
